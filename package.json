@@ -1,0 +1,19 @@
+{
+  "name": "goawaygo-automation-tests",
+  "private": true,
+  "type": "module",
+  "description": "Automated tests of GoAwayGo: API and website (Playwright), Android app (Maestro).",
+  "scripts": {
+    "check": "tsc --noEmit && prettier --check .",
+    "format": "prettier --write .",
+    "test:api": "playwright test --project=api",
+    "test:web": "playwright test --project=web",
+    "report": "playwright show-report reports/html"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/node": "^24.19.2",
+    "prettier": "^3.9.10",
+    "typescript": "~5.9.3"
+  }
+}
