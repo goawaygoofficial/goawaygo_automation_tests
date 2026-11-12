@@ -1,0 +1,30 @@
+# The app's test account signs in with email, then signs out from User Profile.
+# Needs: -e EMAIL=... -e PASSWORD=... (the run's test account, lib/accounts.ts: delivered+goawaygo-app-<env>@resend.dev)
+appId: com.goawaygo.app
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+- extendedWaitUntil:
+    visible: 'SIGN IN'
+    timeout: 60000
+- tapOn: 'SIGN IN'
+- tapOn: 'Enter your Email address...'
+- inputText: ${EMAIL}
+- tapOn: 'Password...'
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: 'SIGN IN'
+- extendedWaitUntil:
+    visible: 'Where do you want to be\?'
+    timeout: 60000
+- tapOn: 'Profile|PROFILE'
+- tapOn: 'User Profile'
+- scrollUntilVisible:
+    element: 'Sign Out'
+- tapOn: 'Sign Out'
+- tapOn: 'Sign out'
+- extendedWaitUntil:
+    visible: 'SIGN IN'
+    timeout: 30000
