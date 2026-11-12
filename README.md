@@ -41,7 +41,8 @@ The full suites need the two secrets in your shell (never in a file). The owner 
 without printing them:
 
 ```bash
-sec() { gcloud secrets versions access latest --secret "$1" --project goawaygo-staging; }
+# tr: on Windows gcloud ends its output with "\r"
+sec() { gcloud secrets versions access latest --secret "$1" --project goawaygo-staging | tr -d '\r'; }
 TEST_FAKES_TOKEN="$(sec goawaygo-test-fakes-token)" AT_ACCOUNT_PASSWORD="$(sec goawaygo-at-account-password)" \
   GOAWAYGO_ENV=dev npx playwright test
 npm run report                                               # opens the HTML report
