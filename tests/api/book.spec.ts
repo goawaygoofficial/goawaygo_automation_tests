@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 import { daysFromNow } from '../../lib/dates';
 import { fakesToken } from '../../lib/env';

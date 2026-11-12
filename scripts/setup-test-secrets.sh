@@ -15,8 +15,8 @@
 #     scripts/setup-test-secrets.sh
 #     gh auth switch -h github.com -u goawaygo-bot        # back to the bot
 #
-# Safe to re-run: stored values are reused and set again in GitHub. ROTATE=1 makes a new token (redeploy dev and test
-# afterwards); the password is kept, because the test accounts already use it.
+# Safe to re-run: stored values are reused and set again in GitHub. ROTATE=1 (after a leak) makes a new token and a new
+# password: the existing test accounts are switched to the new password first. Redeploy dev and test afterwards.
 set -euo pipefail
 
 PROJECT=goawaygo-staging
@@ -48,8 +48,43 @@ store() { # name; value on stdin
   gcloud secrets versions add "$1" --project "$PROJECT" --data-file=- >/dev/null
 }
 
+old_token="$(stored "$TOKEN_SECRET")"
+old_password="$(stored "$PASSWORD_SECRET")"
+
+# ROTATE=1 (after a leak): first the test accounts get the new password, through the API and with the old token (the
+# backend still accepts it); then the new values are stored everywhere. Redeploy dev and test afterwards (they read
+# the token when they start).
+if [ "${ROTATE:-0}" = 1 ] && [ -n "$old_password" ]; then
+  new_password="Gg$(openssl rand -hex 16)!"
+  for environment in dev test; do
+    api="https://api-$environment.goawaygo.com"
+    for suite in api web app pt; do
+      email="delivered+goawaygo-${suite}-${environment}@resend.dev"
+      session="$(printf '{"email":"%s","password":"%s"}' "$email" "$old_password" \
+        | curl -s -X POST "$api/api/auth/signin" -H 'Content-Type: application/json' -H 'X-Client-Type: mobile' \
+          -H "X-GoAwayGo-Test: $old_token" --data-binary @-)"
+      access="$(printf '%s' "$session" | sed -n 's/.*"accessToken":"\([^"]*\)".*/\1/p')"
+      if [ -z "$access" ]; then
+        echo "  $email: no such account (or not signed in), skipped"
+        continue
+      fi
+      status="$(printf '{"password":"%s","newPassword":"%s"}' "$old_password" "$new_password" \
+        | curl -s -o /dev/null -w '%{http_code}' -X POST "$api/api/auth/change-password" \
+          -H 'Content-Type: application/json' -H 'X-Client-Type: mobile' -H "Authorization: Bearer $access" \
+          -H "X-GoAwayGo-Test: $old_token" --data-binary @-)"
+      [ "$status" = 200 ] || { echo "  $email: password change failed (HTTP $status); nothing stored" >&2; exit 1; }
+      echo "  $email: new password"
+    done
+  done
+  printf '%s' "$new_password" | store "$PASSWORD_SECRET"
+  echo "Secret Manager: $PASSWORD_SECRET rotated"
+  unset new_password session access
+fi
+unset old_password
+
 token=""
-[ "${ROTATE:-0}" = 1 ] || token="$(stored "$TOKEN_SECRET")"
+[ "${ROTATE:-0}" = 1 ] || token="$old_token"
+unset old_token
 if [ -z "$token" ]; then
   token="$(openssl rand -hex 32)"
   printf '%s' "$token" | store "$TOKEN_SECRET"

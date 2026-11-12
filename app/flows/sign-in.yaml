@@ -19,7 +19,14 @@ appId: com.goawaygo.app
 - extendedWaitUntil:
     visible: 'Where do you want to be\?'
     timeout: 60000
-- tapOn: 'Profile|PROFILE'
+# The bottom bar's PROFILE tab; wait for the sign-in transition first, and tap again if the screen didn't change.
+- waitForAnimationToEnd:
+    timeout: 10000
+- tapOn:
+    text: 'PROFILE'
+    retryTapIfNoChange: true
+- scrollUntilVisible:
+    element: 'User Profile'
 - tapOn: 'User Profile'
 - scrollUntilVisible:
     element: 'Sign Out'

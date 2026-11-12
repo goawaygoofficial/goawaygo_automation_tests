@@ -19,4 +19,9 @@ else
   bash "$HERE/../scripts/ensure-account.sh" app
   args+=(-e "EMAIL=$email" -e "PASSWORD=${AT_ACCOUNT_PASSWORD:?}")
 fi
-maestro test "${args[@]}" "$HERE/flows"
+status=0
+maestro test "${args[@]}" "$HERE/flows" || status=$?
+# Maestro writes every command with its variables (the test password) into commands*.json and its log: never keep them,
+# the reports are public run artifacts. Screenshots and screen trees stay (password fields show dots).
+find "$OUT" \( -name 'commands*.json' -o -name 'maestro.log' \) -delete 2>/dev/null || true
+exit "$status"
