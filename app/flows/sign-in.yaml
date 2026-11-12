@@ -19,7 +19,11 @@ appId: com.goawaygo.app
 - extendedWaitUntil:
     visible: 'Where do you want to be\?'
     timeout: 60000
-# The bottom bar's PROFILE tab; wait for the sign-in transition first, and tap again if the screen didn't change.
+# The bottom bar's PROFILE tab. The "Welcome back" message covers the bottom bar for a few seconds after sign-in and
+# would catch the tap: wait until it is gone. Tap again if the screen didn't change.
+- extendedWaitUntil:
+    notVisible: 'Welcome back.*'
+    timeout: 20000
 - waitForAnimationToEnd:
     timeout: 10000
 - tapOn:
