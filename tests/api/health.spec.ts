@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 test.describe('health @smoke', () => {
   test('the backend is up', async ({ request }) => {

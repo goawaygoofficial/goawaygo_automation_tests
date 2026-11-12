@@ -1,0 +1,41 @@
+# The app's test account signs in with email, then signs out from User Profile.
+# Needs: -e EMAIL=... -e PASSWORD=... (the run's test account, lib/accounts.ts: delivered+goawaygo-app-<env>@resend.dev)
+appId: com.goawaygo.app
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+- extendedWaitUntil:
+    visible: 'SIGN IN'
+    timeout: 60000
+- tapOn: 'SIGN IN'
+- tapOn: 'Enter your Email address...'
+- inputText: ${EMAIL}
+- tapOn: 'Password...'
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: 'SIGN IN'
+- extendedWaitUntil:
+    visible: 'Where do you want to be\?'
+    timeout: 60000
+# The bottom bar's PROFILE tab. The "Welcome back" message covers the bottom bar for a few seconds after sign-in and
+# would catch the tap: wait until it is gone. Tap again if the screen didn't change.
+- extendedWaitUntil:
+    notVisible: 'Welcome back.*'
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 10000
+- tapOn:
+    text: 'PROFILE'
+    retryTapIfNoChange: true
+- scrollUntilVisible:
+    element: 'User Profile'
+- tapOn: 'User Profile'
+- scrollUntilVisible:
+    element: 'Sign Out'
+- tapOn: 'Sign Out'
+- tapOn: 'Sign out'
+- extendedWaitUntil:
+    visible: 'SIGN IN'
+    timeout: 30000

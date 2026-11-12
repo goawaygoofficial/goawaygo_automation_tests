@@ -1,0 +1,21 @@
+# A guest searches a place and opens its destination page (fake outside services: places start with "Test City").
+appId: com.goawaygo.app
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+- extendedWaitUntil:
+    visible: 'SKIP'
+    timeout: 60000
+- tapOn: 'SKIP'
+- tapOn: 'Where do you want to be\?'
+- inputText: 'test'
+- extendedWaitUntil:
+    visible: 'Test City 1.*'
+    timeout: 30000
+- tapOn: 'Test City 1.*'
+- extendedWaitUntil:
+    visible: 'Plan a trip here'
+    timeout: 60000
+- assertVisible: '.*TEST CITY 1.*|.*Test City 1.*'
