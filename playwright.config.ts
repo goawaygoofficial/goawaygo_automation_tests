@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
-import { apiHeaders, apiUrl, readOnly, webUrl } from './lib/env';
+import { apiUrl, readOnly, webUrl } from './lib/env';
 
 /**
  * Two projects: `api` (requests straight to the backend) and `web` (the website in Chrome). Reports go to `reports/`:
@@ -23,7 +23,9 @@ export default defineConfig({
     ['junit', { outputFile: 'reports/junit.xml' }],
   ],
   use: {
-    trace: 'retain-on-failure',
+    // No traces in CI: they record request headers and typed text (the test-run token, the test password), and the
+    // reports are public run artifacts. Screenshots and videos of failures stay (password fields show dots).
+    trace: process.env.CI ? 'off' : 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
@@ -31,7 +33,8 @@ export default defineConfig({
     {
       name: 'api',
       testDir: 'tests/api',
-      use: { baseURL: apiUrl, extraHTTPHeaders: apiHeaders },
+      // The test-run header is added at run time (tests/api/fixtures.ts), never here: reports copy this configuration.
+      use: { baseURL: apiUrl },
     },
     {
       name: 'web',
