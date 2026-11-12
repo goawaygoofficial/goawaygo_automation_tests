@@ -1,0 +1,17 @@
+# The app starts and a guest reaches Home. Runs everywhere the app is tested (tag: smoke).
+appId: com.goawaygo.app
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+- extendedWaitUntil:
+    visible: 'Travel the World in Your Terms'
+    timeout: 60000
+- tapOn: 'SKIP'
+- extendedWaitUntil:
+    visible: 'Where do you want to be\?'
+    timeout: 30000
+- assertVisible: 'IDEAS FOR YOUR NEXT TRIP ...'
