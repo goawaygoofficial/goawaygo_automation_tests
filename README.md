@@ -74,6 +74,16 @@ App flows need an emulator with a test build (the app repo's `tests.yml` shows h
 `scripts/setup-test-secrets.sh` (owner, once) makes `TEST_FAKES_TOKEN` and `AT_ACCOUNT_PASSWORD` and stores them in
 Secret Manager (goawaygo-staging) and as GitHub secrets of the five repos that run tests. It never prints them.
 
+The dev and test websites are **team only** (Cloudflare Access, MVP 2): a browser must enter a one-time code sent to
+the team Gmail. Test runs get through with the Access service token "goawaygo-tests (dev and test websites)"
+(Cloudflare Zero Trust → Access controls → Service credentials; valid 1 year, until 2027-11-14): GitHub secrets
+`CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` of the website repo, sent only to our website (headers
+`CF-Access-Client-Id`, `CF-Access-Client-Secret`) and never in prod. Renew the token before it expires: create a new
+one, put it in both secrets and the Access application's "Test runs (service token)" policy, then delete the old one.
+
+To run the website tests from your PC against dev or test, also set `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`
+in your shell (from your password manager; the secret is shown only when the token is created).
+
 ## Changing the tests
 
 Same path as every GoAwayGo repo: `feature/<name>` or `fix/<name>` → `develop` → `test` → `main` (the product repos' README → **How we work**).

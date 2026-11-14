@@ -6,6 +6,8 @@
  * - `TEST_FAKES_TOKEN`: makes the backend answer with fake outside services (AI, places, photos, flights), so test
  *   runs use no free quota. Sent only to our own API, never to other hosts. Not used in prod.
  * - `AT_ACCOUNT_PASSWORD`: the password of the test accounts in dev and test (lib/accounts.ts).
+ * - `CF_ACCESS_CLIENT_ID`, `CF_ACCESS_CLIENT_SECRET`: the Cloudflare Access service token. The dev and test websites
+ *   are team-only (Cloudflare Access); the website tests send it to our website only. Not used in prod.
  *
  * In **prod** the tests are read-only: only those tagged `@smoke` run, nobody signs in and nothing is created.
  */
@@ -44,3 +46,10 @@ export const fakesToken = readOnly ? '' : (process.env.TEST_FAKES_TOKEN ?? '').t
 
 /** Headers for requests to our own API. */
 export const apiHeaders: Record<string, string> = fakesToken ? { [TEST_HEADER]: fakesToken } : {};
+
+const accessId = readOnly ? '' : (process.env.CF_ACCESS_CLIENT_ID ?? '').trim();
+const accessSecret = readOnly ? '' : (process.env.CF_ACCESS_CLIENT_SECRET ?? '').trim();
+
+/** Headers for requests to our own website in dev and test: the Cloudflare Access service token (team-only sites). */
+export const webHeaders: Record<string, string> =
+  accessId && accessSecret ? { 'CF-Access-Client-Id': accessId, 'CF-Access-Client-Secret': accessSecret } : {};
