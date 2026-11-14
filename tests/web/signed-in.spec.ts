@@ -2,7 +2,7 @@ import { type Page } from '@playwright/test';
 
 import { accountEmail, accountPassword, freshSignIn } from '../../lib/accounts';
 import { daysFromNow } from '../../lib/dates';
-import { apiHeaders, apiUrl, fakesToken } from '../../lib/env';
+import { apiHeaders, apiUrl, fakesToken, webHeaders, webUrl } from '../../lib/env';
 import { expect, test } from './fixtures';
 
 /**
@@ -27,6 +27,13 @@ test.describe('signed-in journey', () => {
       window.localStorage.setItem('goawaygo.analyticsConsent', 'denied');
       window.localStorage.setItem('goawaygo.language', 'en');
     });
+    // This page is made here (one session for the whole journey), so it adds what the shared fixture adds: the
+    // Cloudflare Access token for our team-only website and the test header for our API.
+    if (Object.keys(webHeaders).length > 0) {
+      await page.route(`${webUrl}/**`, (route) =>
+        route.continue({ headers: { ...route.request().headers(), ...webHeaders } }),
+      );
+    }
     await page.route(`${apiUrl}/**`, (route) =>
       route.continue({ headers: { ...route.request().headers(), ...apiHeaders } }),
     );
