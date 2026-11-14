@@ -2,7 +2,7 @@ import { expect, test } from './fixtures';
 
 import { environment, webUrl } from '../../lib/env';
 
-// The website the backend serves (prod: staging.goawaygo.com until the launch); defaults to this run's website.
+// The website the backend allows (prod: goawaygo.com, from PROD_WEB_URL); defaults to this run's website.
 const allowedOrigin = (process.env.ALLOWED_ORIGIN || webUrl).replace(/\/+$/, '');
 
 test.describe('security @smoke', () => {
